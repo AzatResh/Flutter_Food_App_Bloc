@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:food_app/bloc/food_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -10,12 +12,9 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const MyHomePage(),
+    return BlocProvider(
+      create:(context) => FoodBloc()..add(FoodFetchEvent()),
+      child: const MaterialApp(home: MyHomePage())
     );
   }
 }
@@ -36,9 +35,29 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Food App'),
       ),
-      body: Center(
-        
-      ),
+      body: BlocBuilder<FoodBloc, FoodState>(
+
+        builder: (context, state) {
+          final items = context.select((FoodBloc bloc) => bloc.state.items);
+          return 
+            !context.read<FoodBloc>().state.isLoading ?
+              ListView.builder(
+                itemCount: items.length,
+                itemBuilder: (context, index) {
+                  return(
+                    Container(
+                      child: Column(
+                        children: [
+                          Image(image: NetworkImage(items[index]['strCategoryThumb'])),
+                          Text(items[index]['strCategory'])
+                        ],
+                      ),
+                    )
+                  );
+                },
+            ): const CircularProgressIndicator();
+        },
+      )
     );
   }
 }
