@@ -5,15 +5,15 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:http/http.dart' as http;
 
-part 'food_state.dart';
-part 'food_event.dart';
+part 'categories_state.dart';
+part 'categories_event.dart';
 
-class FoodBloc extends Bloc<FoodEvent, FoodState>{
-  FoodBloc(): super(FoodState()){
-    on<FoodFetchEvent>(_onFetched);
+class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState>{
+  CategoriesBloc(): super(CategoriesState()){
+    on<CategoriesFetchEvent>(_onFetched);
   }
 
-  _onFetched(FoodFetchEvent event, Emitter<FoodState> emit) async{
+  _onFetched(CategoriesFetchEvent event, Emitter<CategoriesState> emit) async{
     await Future.delayed(const Duration(seconds: 5));
 
     final url = Uri.parse('https://themealdb.com/api/json/v1/1/categories.php');
@@ -21,10 +21,10 @@ class FoodBloc extends Bloc<FoodEvent, FoodState>{
 
     if(response.statusCode == 200){
       final data = jsonDecode(response.body);
-      final List foodItems = await data['categories'];
+      final List categoriesItems = await data['categories'];
 
       emit(state.copyWith(
-        items: foodItems,
+        categories: categoriesItems,
         isLoading: false
       ));
     }

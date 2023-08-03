@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:food_app/bloc/food_bloc.dart';
+import 'package:food_app/bloc/category_bloc/categories_bloc.dart';
 
 void main() {
   runApp(const MyApp());
@@ -13,7 +13,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create:(context) => FoodBloc()..add(FoodFetchEvent()),
+      create:(context) => CategoriesBloc()..add(CategoriesFetchEvent()),
       child: const MaterialApp(home: MyHomePage())
     );
   }
@@ -33,14 +33,14 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Food App'),
+        title: Text('Categories App'),
       ),
-      body: BlocBuilder<FoodBloc, FoodState>(
+      body: BlocBuilder<CategoriesBloc, CategoriesState>(
 
         builder: (context, state) {
-          final items = context.select((FoodBloc bloc) => bloc.state.items);
+          final items = context.select((CategoriesBloc bloc) => bloc.state.categories);
           return 
-            !context.read<FoodBloc>().state.isLoading ?
+            !context.read<CategoriesBloc>().state.isLoading ?
               ListView.builder(
                 itemCount: items.length,
                 itemBuilder: (context, index) {
