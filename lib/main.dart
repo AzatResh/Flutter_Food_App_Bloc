@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:food_app/bloc/category_bloc/categories_bloc.dart';
+import 'package:food_app/widgets/categoriesList.dart';
 
 void main() {
   runApp(const MyApp());
@@ -9,13 +10,9 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create:(context) => CategoriesBloc()..add(CategoriesFetchEvent()),
-      child: const MaterialApp(home: MyHomePage())
-    );
+    return const MaterialApp(home: MyHomePage());
   }
 }
 
@@ -27,7 +24,6 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -35,28 +31,30 @@ class _MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text('Categories App'),
       ),
-      body: BlocBuilder<CategoriesBloc, CategoriesState>(
-
-        builder: (context, state) {
-          final items = context.select((CategoriesBloc bloc) => bloc.state.categories);
-          return 
-            !context.read<CategoriesBloc>().state.isLoading ?
-              ListView.builder(
-                itemCount: items.length,
-                itemBuilder: (context, index) {
-                  return(
-                    Container(
-                      child: Column(
-                        children: [
-                          Image(image: NetworkImage(items[index]['strCategoryThumb'])),
-                          Text(items[index]['strCategory'])
-                        ],
-                      ),
-                    )
-                  );
-                },
-            ): const CircularProgressIndicator();
-        },
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            Container(
+              height: 65,
+              margin: EdgeInsets.all(5),
+              child: TextField(
+                textAlignVertical: TextAlignVertical.center,
+                style:TextStyle(fontSize:18),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(),
+                  hintStyle: TextStyle(color: Colors.grey),
+                  hintText: "Введите название блюда",
+                  prefixIcon: Icon(Icons.search, color: Colors.red,)
+                ),
+              ),
+            ),
+            
+            Container(
+              height: 50,
+              child: CategoriesList()
+            ),
+          ],
+        ),
       )
     );
   }

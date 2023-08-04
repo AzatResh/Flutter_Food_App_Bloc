@@ -14,7 +14,7 @@ class CategoriesBloc extends Bloc<CategoriesEvent, CategoriesState>{
   }
 
   _onFetched(CategoriesFetchEvent event, Emitter<CategoriesState> emit) async{
-    await Future.delayed(const Duration(seconds: 5));
+    await Future.delayed(const Duration(seconds: 1));
 
     final url = Uri.parse('https://themealdb.com/api/json/v1/1/categories.php');
     final response = await http.get(url);
