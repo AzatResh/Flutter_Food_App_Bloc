@@ -46,8 +46,8 @@ class _MyHomePageState extends State<MyHomePage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Color.fromARGB(255, 242, 242, 242),
-                  Colors.white,
+                  Color.fromARGB(255, 247, 247, 247),
+                  Color.fromARGB(255, 239, 239, 239),
               ],
             )
               ),
@@ -104,55 +104,127 @@ class _MyHomePageState extends State<MyHomePage> {
                 },
               )
             ),
-            BlocBuilder<FoodBloc, FoodState>(
-              builder: (context, state) {
-                if(state is FoodStateLoaded){
-                  List items = state.foods;
-                  return Expanded(
-                    child:GridView.builder(
-                      padding: const EdgeInsets.all(10),
-                      itemCount: items.length,
-                      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                        childAspectRatio: (120.0 / 185.0),
-                        crossAxisCount: 3,
-                        crossAxisSpacing: 10,
-                        mainAxisSpacing: 10), 
-                      itemBuilder:(context, index) {
-                        return (
-                          Container(
-                            child: Column(
-                              children: <Widget> [
+            Expanded(
+              child: CustomScrollView(
+                slivers: [
+                  SliverToBoxAdapter(
+                    child:
+                      BlocBuilder<CategoriesBloc, CategoriesState>(
+                        builder: (context, state) {
+                        final categories = context.select((CategoriesBloc bloc) => bloc.state.categories);
+                        if(!state.isLoading){
+                          return 
+                            Column(
+                              children: [
                                 Container(
-                                  height: 140,
+                                  width: MediaQuery.of(context).copyWith().size.width,
+                                  padding: const EdgeInsets.only(left: 5),
+                                  child: Text(
+                                    categories[_selectedCategoryIndex]['strCategory'], 
+                                    textAlign: TextAlign.left,
+                                    style: const TextStyle(
+                                      fontSize: 32, 
+                                      fontWeight: FontWeight.w300),),),
+                                Container(
+                                  margin: EdgeInsets.all(10),
                                   decoration: BoxDecoration(
-                                    image: DecorationImage(
-                                      image: NetworkImage(items[index]['strMealThumb']),
-                                      fit: BoxFit.cover) 
-                                  ),
-                                ),
-                                Text(
-                                  items[index]['strMeal'], 
-                                  maxLines: 2,
-                                  textAlign: TextAlign.center,)
+                                        color: Colors.white,
+                                        borderRadius: BorderRadius.circular(5)
+                                      ),
+                                  child: Column(
+                                    children: <Widget> [
+                                      Container(
+                                        height: 220,
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(categories[_selectedCategoryIndex]['strCategoryThumb']),
+                                            fit: BoxFit.cover) 
+                                        ),
+                                      ),
+                                      Container(
+                                        padding: EdgeInsets.all(10),
+                                        child: Text(
+                                          categories[_selectedCategoryIndex]['strCategoryDescription'].split('.').take(2).join('.')+".",
+                                          textAlign: TextAlign.justify,),
+                                      ) ,
+                                    ],
+                                  )
+                                )
                               ],
-                            ),
-                          )
-                        );
+                            );
+                        } else {
+                          return Container();
+                        }
                       }
                     )
-                  );
-                } else {
-                  return 
-                    const SizedBox(
-                      height: 100,
-                      width: 100,
-                      child: CircularProgressIndicator(),
-                    );
-                }
-              },
+                  ),
+                  SliverToBoxAdapter(
+                    child: Container(
+                      padding: EdgeInsets.only(left: 5),
+                      child: Text('Foods', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w300),),),
+                  ),
+                  BlocBuilder<FoodBloc, FoodState>(
+                    builder: (context, state) {
+                      if(state is FoodStateLoaded){
+                        List items = state.foods;
+                        return SliverGrid(
+                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                          ),
+                          delegate: SliverChildBuilderDelegate(
+                            childCount: items.length,
+                            (BuildContext context, int index) {
+                              return (
+                                Container(
+                                  margin: EdgeInsets.all(5),
+                                  decoration: BoxDecoration(
+                                    color: Colors.white,
+                                    borderRadius: BorderRadius.circular(5)
+                                  ),
+                                  child: Column(
+                                    children: <Widget> [
+                                      Container(
+                                        height: 140,
+                                        margin: EdgeInsets.only(bottom: 5),
+                                        decoration: BoxDecoration(
+                                          image: DecorationImage(
+                                            image: NetworkImage(items[index]['strMealThumb']),
+                                            fit: BoxFit.cover) 
+                                        ),
+                                      ),
+                                      Text(
+                                        items[index]['strMeal'], 
+                                        maxLines: 2,
+                                        textAlign: TextAlign.center,)
+                                    ],
+                                ),
+                              )
+                            );
+                          }
+                        )
+                      );     
+                    } else {
+                      return 
+                        SliverToBoxAdapter(
+                          child: Container(
+                            height: 100,
+                            child: const Align(
+                              alignment: Alignment.center,
+                              child: SizedBox(
+                                height: 50,
+                                width: 50,
+                                child: CircularProgressIndicator(),
+                              ),
+                            )),
+                        );    
+                      }
+                    },
+                  )
+                ],
+              ),
             )
-          ],
-        ),
+          ]
+        )
       )
     );
   }
