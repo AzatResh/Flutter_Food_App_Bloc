@@ -2,7 +2,7 @@ part of 'categories_bloc.dart';
 
 class CategoriesState extends Equatable{
 
-  final List categories;
+  final List<FoodCategory> categories;
   final bool isLoading;
 
   const CategoriesState({
@@ -11,7 +11,7 @@ class CategoriesState extends Equatable{
   });
   
   CategoriesState copyWith({
-    List? categories,
+    List<FoodCategory>? categories,
     bool isLoading = true
     }){
       return CategoriesState(

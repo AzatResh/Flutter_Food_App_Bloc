@@ -14,7 +14,7 @@ class FoodLoadingState extends FoodState{
 
 class FoodStateLoaded extends FoodState{
 
-  final List foods;
+  final List<Food> foods;
 
   FoodStateLoaded({required this.foods});
 

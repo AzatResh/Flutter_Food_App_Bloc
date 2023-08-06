@@ -1,21 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:food_app/bloc/food_bloc/food_bloc.dart';
+import 'package:food_app/repositories/food_repository.dart';
 import '../bloc/category_bloc/categories_bloc.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
+  MyApp({super.key});
+
+  final foodRepository = FoodRepository();
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create:(context) => CategoriesBloc()..add(CategoriesFetchEvent())),
-        BlocProvider(create:(context) => FoodBloc()..add(FoodGetFoodEvent(category: 'Seafood')))
+        BlocProvider(create:(context) => CategoriesBloc(foodRepository: foodRepository)..add(CategoriesFetchEvent())),
+        BlocProvider(create:(context) => FoodBloc(foodRepository: foodRepository)..add(FoodGetFoodEvent(category: 'Seafood')))
       ], 
       child: const MaterialApp(home: MyHomePage())
     );
@@ -52,6 +55,7 @@ class _MyHomePageState extends State<MyHomePage> {
             )
               ),
           child: Column(children: [
+            SizedBox(height: 10,),
             Container(
               height: 65,
               margin: const EdgeInsets.all(5),
@@ -84,13 +88,13 @@ class _MyHomePageState extends State<MyHomePage> {
                           (int index) {
                             return ChoiceChip(
                               selected: index == _selectedCategoryIndex,
-                              label: Text(items[index]['strCategory'], style: TextStyle(color: Color.fromARGB(255, 246, 246, 246)),),
+                              label: Text(items[index].title, style: TextStyle(color: Color.fromARGB(255, 246, 246, 246)),),
                               selectedColor: Color.fromARGB(255, 198, 25, 13),
                               backgroundColor: Colors.red,
                               onSelected: (selected) {
                                 if(selected){
                                   setState(() {
-                                    context.read<FoodBloc>().add(FoodGetFoodEvent(category: items[index]['strCategory']));
+                                    context.read<FoodBloc>().add(FoodGetFoodEvent(category: items[index].title));
                                     _selectedCategoryIndex = index;
                                   });
                                 }
@@ -120,7 +124,7 @@ class _MyHomePageState extends State<MyHomePage> {
                                   width: MediaQuery.of(context).copyWith().size.width,
                                   padding: const EdgeInsets.only(left: 5),
                                   child: Text(
-                                    categories[_selectedCategoryIndex]['strCategory'], 
+                                    categories[_selectedCategoryIndex].title, 
                                     textAlign: TextAlign.left,
                                     style: const TextStyle(
                                       fontSize: 32, 
@@ -137,14 +141,14 @@ class _MyHomePageState extends State<MyHomePage> {
                                         height: 220,
                                         decoration: BoxDecoration(
                                           image: DecorationImage(
-                                            image: NetworkImage(categories[_selectedCategoryIndex]['strCategoryThumb']),
+                                            image: NetworkImage(categories[_selectedCategoryIndex].poster),
                                             fit: BoxFit.cover) 
                                         ),
                                       ),
                                       Container(
                                         padding: EdgeInsets.all(10),
                                         child: Text(
-                                          categories[_selectedCategoryIndex]['strCategoryDescription'].split('.').take(2).join('.')+".",
+                                          categories[_selectedCategoryIndex].description.split('.').take(2).join('.')+".",
                                           textAlign: TextAlign.justify,),
                                       ) ,
                                     ],
@@ -188,12 +192,12 @@ class _MyHomePageState extends State<MyHomePage> {
                                         margin: EdgeInsets.only(bottom: 5),
                                         decoration: BoxDecoration(
                                           image: DecorationImage(
-                                            image: NetworkImage(items[index]['strMealThumb']),
+                                            image: NetworkImage(items[index].poster),
                                             fit: BoxFit.cover) 
                                         ),
                                       ),
                                       Text(
-                                        items[index]['strMeal'], 
+                                        items[index].title, 
                                         maxLines: 2,
                                         textAlign: TextAlign.center,)
                                     ],

@@ -1,27 +1,29 @@
-import 'dart:convert';
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:bloc/bloc.dart';
-import 'package:http/http.dart' as http;
+import 'package:food_app/model/food_response.dart';
+import 'package:food_app/repositories/food_repository.dart';
+import 'package:food_app/model/food.dart';
 
 part 'food_state.dart';
 part 'food_event.dart';
 
 class FoodBloc extends Bloc<FoodEvent, FoodState>{
-  FoodBloc() : super(FoodStateInit()){
+  FoodBloc({required this.foodRepository}) : super(FoodStateInit()){
     on<FoodGetFoodEvent>(_onGetFood);
   }
 
+  final FoodRepository foodRepository;
+
   _onGetFood(FoodGetFoodEvent event, Emitter<FoodState> emit) async {
     emit(FoodLoadingState());
-    final url = Uri.parse('https://themealdb.com/api/json/v1/1/filter.php?c=${event.category}');
-    final response = await http.get(url);
+    FoodResponse foodResponse = await foodRepository.getFoodsByCategory(event.category);
 
-    if(response.statusCode == 200){
-      final data = jsonDecode(response.body);
-      final List foods = await data['meals'];
-
-      emit(FoodStateLoaded(foods: foods));
+    if(!foodResponse.hasError){
+      emit(FoodStateLoaded(foods: foodResponse.foods));
+    }
+    else{
+      throw Exception(foodResponse.error);
     }
   }
 }
