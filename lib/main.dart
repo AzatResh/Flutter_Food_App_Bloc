@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:food_app/bloc/food_bloc/food_bloc.dart';
+import 'package:food_app/model/food.dart';
 import 'package:food_app/repositories/food_repository.dart';
+import 'package:food_app/screens/foodDetails.dart';
 import '../bloc/category_bloc/categories_bloc.dart';
 
 void main() {
@@ -18,23 +20,29 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create:(context) => CategoriesBloc(foodRepository: foodRepository)..add(CategoriesFetchEvent())),
-        BlocProvider(create:(context) => FoodBloc(foodRepository: foodRepository)..add(FoodGetFoodEvent(category: 'Seafood')))
+        BlocProvider(create:(context) => FoodBloc(foodRepository: foodRepository)..add(FoodGetFoodEvent(category: 'Beef')))
       ], 
-      child: const MaterialApp(home: MyHomePage())
+      child: MaterialApp(home: MyHomePage(foodRepository: foodRepository,))
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+
+  final FoodRepository foodRepository;
+
+  MyHomePage({required this.foodRepository, super.key});
 
   @override
-  State<MyHomePage> createState() => _MyHomePageState();
+  State<MyHomePage> createState() => _MyHomePageState(foodRepository: foodRepository);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
 
+  final FoodRepository foodRepository;
   int _selectedCategoryIndex = 0;
+
+  _MyHomePageState({required this.foodRepository});
 
   @override
   Widget build(BuildContext context) {
@@ -55,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
             )
               ),
           child: Column(children: [
-            SizedBox(height: 10,),
+            const SizedBox(height: 10,),
             Container(
               height: 65,
               margin: const EdgeInsets.all(5),
@@ -164,13 +172,13 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   SliverToBoxAdapter(
                     child: Container(
-                      padding: EdgeInsets.only(left: 5),
-                      child: Text('Foods', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w300),),),
+                      padding: const EdgeInsets.only(left: 5),
+                      child: const Text('Foods', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w300),),),
                   ),
                   BlocBuilder<FoodBloc, FoodState>(
                     builder: (context, state) {
                       if(state is FoodStateLoaded){
-                        List items = state.foods;
+                        List<Food> items = state.foods;
                         return SliverGrid(
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,
@@ -185,23 +193,35 @@ class _MyHomePageState extends State<MyHomePage> {
                                     color: Colors.white,
                                     borderRadius: BorderRadius.circular(5)
                                   ),
-                                  child: Column(
-                                    children: <Widget> [
-                                      Container(
-                                        height: 140,
-                                        margin: EdgeInsets.only(bottom: 5),
-                                        decoration: BoxDecoration(
-                                          image: DecorationImage(
-                                            image: NetworkImage(items[index].poster),
-                                            fit: BoxFit.cover) 
+                                  child: InkWell(
+                                    onTap: (){
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder:(context) => FoodDetailsWidget(
+                                            foodRepository: foodRepository,
+                                            id: items[index].id,
+                                            title: items[index].title,
+                                          ))
+                                      );
+                                    },
+                                    child: Column(
+                                      children: <Widget> [
+                                        Container(
+                                          height: 140,
+                                          margin: EdgeInsets.only(bottom: 5),
+                                          decoration: BoxDecoration(
+                                            image: DecorationImage(
+                                              image: NetworkImage(items[index].poster),
+                                              fit: BoxFit.cover) 
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        items[index].title, 
-                                        maxLines: 2,
-                                        textAlign: TextAlign.center,)
-                                    ],
-                                ),
+                                        Text(
+                                          items[index].title, 
+                                          maxLines: 2,
+                                          textAlign: TextAlign.center,)
+                                      ],
+                                  ),
+                                ) 
                               )
                             );
                           }
