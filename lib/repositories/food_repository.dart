@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:food_app/model/category_response.dart';
+import 'package:food_app/model/foodDetails_response.dart';
 import 'package:food_app/model/food_response.dart';
 import 'package:http/http.dart' as http;
 
@@ -9,6 +10,7 @@ class FoodRepository{
 
   String categoriesUrl = '$mainUrl/categories.php';
   String foodsByCategoryUrl = '$mainUrl/filter.php?c=';
+  String foodByIdUrl = '$mainUrl/lookup.php?i=';
   
   Future<CategoryResponse> getCategories() async{
     final url = Uri.parse(categoriesUrl);
@@ -33,6 +35,19 @@ class FoodRepository{
     }
     catch(error, stacktrace){
       return FoodResponse.withError("Error: $error, StackTrace: $stacktrace");
+    }
+  }
+
+  Future<FoodDetailResponse> getFoodByID(String id) async{
+    final url = Uri.parse(foodByIdUrl+id);
+    final response = await http.get(url);
+
+    try{
+      final data = jsonDecode(response.body);
+      return FoodDetailResponse.fromJson(data);
+    }
+    catch(error, stacktrace){
+      return FoodDetailResponse.withError("Error: $error, StackTrace: $stacktrace");
     }
   }
 }
