@@ -40,6 +40,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
 
   final FoodRepository foodRepository;
+  TextEditingController _searchController = TextEditingController();
   int _selectedCategoryIndex = 0;
 
   _MyHomePageState({required this.foodRepository});
@@ -67,16 +68,34 @@ class _MyHomePageState extends State<MyHomePage> {
             Container(
               height: 65,
               margin: const EdgeInsets.all(5),
-              child: const TextField(
-                textAlignVertical: TextAlignVertical.center,
-                style:TextStyle(fontSize:18),
-                decoration: InputDecoration(
-                  border: OutlineInputBorder(),
-                  hintStyle: TextStyle(color: Colors.grey),
-                  hintText: "Введите название блюда",
-                  prefixIcon: Icon(Icons.search, color: Colors.red,)
-                ),
-              ),
+              child: BlocBuilder<FoodBloc, FoodState>(
+                builder: (context, state) {
+                  return TextField(
+                    controller: _searchController,
+                    textAlignVertical: TextAlignVertical.center,
+                    style: const TextStyle(fontSize:18),
+                    decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      hintStyle: TextStyle(color: Colors.grey),
+                      hintText: "Введите название блюда " + (state.currentCategory),
+                      prefixIcon: Icon(Icons.search, color: Colors.red,)
+                    ),
+                    onChanged: (name){
+                      setState(() {
+                        if(name.isNotEmpty){
+                          context.read<FoodBloc>().add(SearchFoodEvent(
+                            name: name, 
+                            category: state.currentCategory));
+                        }
+                        else{
+                          context.read<FoodBloc>().add(FoodGetFoodEvent(
+                            category: state.currentCategory));
+                        }
+                      });
+                    },
+                  );
+                }
+              )
             ),
           
             Container(
@@ -102,8 +121,17 @@ class _MyHomePageState extends State<MyHomePage> {
                               onSelected: (selected) {
                                 if(selected){
                                   setState(() {
-                                    context.read<FoodBloc>().add(FoodGetFoodEvent(category: items[index].title));
-                                    _selectedCategoryIndex = index;
+                                    if(_searchController.text.isNotEmpty){
+                                      context.read<FoodBloc>().add(SearchFoodEvent(
+                                        name: _searchController.text, 
+                                        category: items[index].title
+                                      ));
+                                  }
+                                  else{
+                                    context.read<FoodBloc>().add(FoodGetFoodEvent(
+                                      category: items[index].title));
+                                  }
+                                  _selectedCategoryIndex = index;
                                   });
                                 }
                               },
@@ -165,7 +193,13 @@ class _MyHomePageState extends State<MyHomePage> {
                               ],
                             );
                         } else {
-                          return Container();
+                          return Center(
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              child: CircularProgressIndicator(),
+                            ),
+                          );
                         }
                       }
                     )
@@ -177,8 +211,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   BlocBuilder<FoodBloc, FoodState>(
                     builder: (context, state) {
-                      if(state is FoodStateLoaded){
+                      if(!state.isLoading){
                         List<Food> items = state.foods;
+                        if(items.isEmpty){
+                          return SliverToBoxAdapter(
+                            child: Container(
+                              height: 100,
+                              child: Center(
+                                child: Text("Nothing found", 
+                                  style: TextStyle(fontSize: 24),)),
+                          ));
+                        }
                         return SliverGrid(
                           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                             crossAxisCount: 2,

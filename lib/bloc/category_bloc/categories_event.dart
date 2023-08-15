@@ -9,7 +9,14 @@ class CategoriesInitEvent extends CategoriesEvent{
 }
 
 class CategoriesFetchEvent extends CategoriesEvent{
+  @override
+  List<Object?> get props => [];
+}
+class CategoryChooseEvent extends CategoriesEvent{
   
+  final String category;
+  CategoryChooseEvent({required this.category});
+
   @override
   List<Object?> get props => [];
 }

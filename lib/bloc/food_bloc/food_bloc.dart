@@ -9,18 +9,41 @@ part 'food_state.dart';
 part 'food_event.dart';
 
 class FoodBloc extends Bloc<FoodEvent, FoodState>{
-  FoodBloc({required this.foodRepository}) : super(FoodStateInit()){
+  FoodBloc({required this.foodRepository}) : super(FoodState()){
     on<FoodGetFoodEvent>(_onGetFood);
+    on<SearchFoodEvent>(_onSearch);
   }
 
   final FoodRepository foodRepository;
 
   _onGetFood(FoodGetFoodEvent event, Emitter<FoodState> emit) async {
-    emit(FoodLoadingState());
+    emit(state.copyWith(
+      isLoading: true
+    ));
     FoodResponse foodResponse = await foodRepository.getFoodsByCategory(event.category);
 
     if(!foodResponse.hasError){
-      emit(FoodStateLoaded(foods: foodResponse.foods));
+      emit(state.copyWith(
+        foods: foodResponse.foods,
+        currentCategory: event.category,
+        isLoading: false));
+    }
+    else{
+      throw Exception(foodResponse.error);
+    }
+  }
+
+  _onSearch(SearchFoodEvent event, Emitter<FoodState> emit) async {
+    emit(state.copyWith(
+      isLoading: true
+    ));
+    FoodResponse foodResponse = await foodRepository.searchFood(event.name, event.category);
+
+    if(!foodResponse.hasError){
+      emit(state.copyWith(
+        foods: foodResponse.foods, 
+        currentCategory: event.category, 
+        isLoading: false));
     }
     else{
       throw Exception(foodResponse.error);

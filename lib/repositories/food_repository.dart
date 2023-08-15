@@ -10,6 +10,7 @@ class FoodRepository{
 
   String categoriesUrl = '$mainUrl/categories.php';
   String foodsByCategoryUrl = '$mainUrl/filter.php?c=';
+  String foodsByNameUrl = '$mainUrl/search.php?s=';
   String foodByIdUrl = '$mainUrl/lookup.php?i=';
   
   Future<CategoryResponse> getCategories() async{
@@ -32,6 +33,20 @@ class FoodRepository{
     try{
       final data = jsonDecode(response.body);
       return FoodResponse.fromJson(data);
+    }
+    catch(error, stacktrace){
+      return FoodResponse.withError("Error: $error, StackTrace: $stacktrace");
+    }
+  }
+
+  Future<FoodResponse> searchFood(String name, String category) async{
+    final url = Uri.parse(foodsByNameUrl+name);
+    final response = await http.get(url);
+
+    try{
+      final data = jsonDecode(response.body);
+      if(data['meals']!= null)  return FoodResponse.filterByCategory(data, category);
+      else return FoodResponse.empty();
     }
     catch(error, stacktrace){
       return FoodResponse.withError("Error: $error, StackTrace: $stacktrace");

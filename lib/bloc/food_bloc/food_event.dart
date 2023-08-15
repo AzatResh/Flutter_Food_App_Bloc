@@ -8,5 +8,15 @@ class FoodGetFoodEvent extends FoodEvent{
   FoodGetFoodEvent({required this.category});
 
   @override
-  List<Object?> get props => [];
+  List<Object?> get props => [category];
+}
+
+class SearchFoodEvent extends FoodEvent{
+  final String name;
+  final String category;
+
+  SearchFoodEvent({required this.name, required this.category});
+
+  @override
+  List<Object?> get props => [name, category];
 }

@@ -1,23 +1,28 @@
 part of 'food_bloc.dart';
 
-abstract class FoodState extends Equatable{}
-
-class FoodStateInit extends FoodState{
-  @override
-  List<Object?> get props => [];
-}
-
-class FoodLoadingState extends FoodState{
-  @override
-  List<Object?> get props => [];
-}
-
-class FoodStateLoaded extends FoodState{
-
+class FoodState extends Equatable{
+  
+  final String currentCategory;
   final List<Food> foods;
+  final bool isLoading;
 
-  FoodStateLoaded({required this.foods});
+  FoodState({
+    this.foods = const [],
+    this.currentCategory = '',
+    this.isLoading = true
+  });
 
+  FoodState copyWith({
+    String? currentCategory,
+    List<Food>? foods,
+    bool? isLoading = true,
+  }){
+    return FoodState(
+      currentCategory: currentCategory?? this.currentCategory,
+      foods: foods?? this.foods,
+      isLoading: isLoading?? this.isLoading
+    );
+  }
   @override
-  List<Object?> get props => [foods];
+  List<Object?> get props => [foods, currentCategory, isLoading];
 }
